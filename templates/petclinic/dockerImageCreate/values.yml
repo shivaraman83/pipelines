@@ -1,1 +1,23 @@
-Sample here
+Artifactory: Artifactory
+Pipelines:
+  name: SamplePipeline
+GitRepo:
+  name: GitRepoResource
+  path: Sample
+Step1 :
+  name: step1Name
+Step2 :
+  name: step2Name
+  dockerFileLocation: docfileLocation
+  dockerImageName: NameForYourDockerImage
+  outputResourceName: DockerImageBuildInfoName
+Step3 :
+  name: step3Name
+  outputResourceName : DockerImagePublishedBuildInfo
+Resource1 :
+  name : NameForyourMavenDockerImage
+  imageName : ImageName
+Resource2 :
+  name : ProducedDockerImageBuildInfo
+  imageName : ImageName
+

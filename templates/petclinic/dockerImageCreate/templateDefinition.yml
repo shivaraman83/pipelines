@@ -1,10 +1,5 @@
 pipelines:
   - name: {{ .Values.Pipelines.name }}
-      configuration:
-        environmentVariables:
-          readOnly:
-            my_env_var: '1.0.$run_number'
-            ArtIP: $(echo ${int_ArtifactoryUnified_url}|awk -F '/' '{print $3}'|awk -F ':' '{print $1}')
       steps:
         - name: {{ .Values.Step1.name }}
           type: MvnBuild
@@ -41,19 +36,19 @@ pipelines:
           type: DockerBuild
           configuration:
             affinityGroup: bldGroup
-            dockerFileLocation: {{ .Values.pipelines.dockerfile.location }}
+            dockerFileLocation: {{ .Values.Step2.dockerFileLocation }}
             dockerFileName: Dockerfile
-            dockerImageName: docker.${ArtIP}/pet_clinic_config_server_docker_image
+            dockerImageName: {{ .Values.Step2.dockerImageName }}
             dockerImageTag: '${run_number}'
             integrations:
-              - name: {{ .Values.artifactory }}
+              - name: {{ .Values.Artifactory }}
             inputResources:
-              - name: {{ .Values.gitRepo.name }}
+              - name: {{ .Values.GitRepo.name }}
                 trigger: false
             outputResources:
-              - name: {{ .Values.dockerimage.name }}
+              - name: {{ .Values.Step2.outputResourceName }}
             inputSteps:
-              - name: {{ .Values.step1.name }}
+              - name: {{ .Values.Step1.name }}
           execution:
             onStart:
               - sed -i "s/docker.artifactory/docker.${ArtIP}/" $res_PetClinicProjectGitRepo_resourcePath/Samples/pet-clinic-project/spring-petclinic-microservices/spring-petclinic-config-server/Dockerfile
@@ -62,7 +57,7 @@ pipelines:
             onComplete:
               - echo $step_env_var2
               - echo "Running $pipeline_name | $step_name on node ID $step_node_id"
-        - name: push_config_server_docker_image
+        - name: {{ .Values.Step3.name }}
           type: DockerPush
           configuration:
             affinityGroup: bldGroup
@@ -71,8 +66,8 @@ pipelines:
             failOnScan: false
             autoPublishBuildInfo: true
             integrations:
-              - name: {{ .Values.artifactory }}
+              - name: {{ .Values.Artifactory }}
             inputSteps:
-              - name: {{ .Values.step2.name }}
+              - name: {{ .Values.Step2.name }}
             outputResources:
-              - name: {{ .Values.outputresource.name }}
+              - name: {{ .Values.Step3.outputResourceName }}

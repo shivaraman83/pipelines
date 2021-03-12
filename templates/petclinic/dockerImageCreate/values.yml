@@ -1,6 +1,6 @@
 Artifactory: ArtifactoryUnified
 Pipelines:
-  name: pet_clinic_config_server
+  name: pet_clinic_config
 GitRepo:
   name: PetClinicProjectGitRepo
   path: Samples/pet-clinic-project/spring-petclinic-microservices/spring-petclinic-config-server

@@ -13,6 +13,13 @@ resources:
       sourceArtifactory: {{ .Values.Artifactory }}
       buildName: {{ .Values.Pipelines.name }}
       buildNumber: 1
+  - name: {{ .Values.Resource3.name }}
+    type: GitRepo
+    configuration:
+      gitProvider: {{ .Values.Resource3.gitProvider }}
+      path: {{ .Values.Resource3.path }}
+      branches:
+        include: {{ .Values.Resource3.branch }}
 pipelines:
   - name: {{ .Values.Pipelines.name }}
     steps:

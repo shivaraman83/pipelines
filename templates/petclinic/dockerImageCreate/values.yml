@@ -1,9 +1,20 @@
-Artifactory: Artifactory
+Resource1 :
+  name : Name of your DockerImage
+  imageName : ImageName
+Resource2 :
+  name : Name for your build Info
+  imageName : ImageName
+Resource3 :
+  name : Name for for Github repo
+  gitProvider : Integration name for your github project
+  path: Relative path for your github project (e.g. jfrog/projec)
+  branch : Branch name if any
+Artifactory: Integration Name of Artifactory
 Pipelines:
-  name: SamplePipeline
+  name: The name for your pipeline
 GitRepo:
-  name: GitRepoResource
-  path: Sample
+  name: Integration name for your Git repo
+  path: Path to your maven source code
 Step1 :
   name: step1Name
 Step2 :
@@ -14,10 +25,4 @@ Step2 :
 Step3 :
   name: step3Name
   outputResourceName : DockerImagePublishedBuildInfo
-Resource1 :
-  name : NameForyourMavenDockerImage
-  imageName : ImageName
-Resource2 :
-  name : ProducedDockerImageBuildInfo
-  imageName : ImageName
 

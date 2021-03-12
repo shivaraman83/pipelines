@@ -1,31 +1,78 @@
 pipelines:
-  - name: basic
-    steps:
-      - name: basic1
-        type: Bash
-        configuration:
-          runtime:
-            type: image
-        execution:
-          onExecute:
-            - printenv {{ .Values.foo.bar }}
-      - name: basic2
-        type: Bash
-        configuration:
-          runtime:
-            type: image
-          inputSteps:
-            - name: basic1
-        execution:
-          onExecute:
-            - printenv {{ .Values.foo.baz }}
-      - name: basic3
-        type: Bash
-        configuration:
-          runtime:
-            type: image
-          inputSteps:
-            - name: basic2
-        execution:
-          onExecute:
-            - printenv {{ .Values.foo.zoo }}
+  - name: {{ .Values.Pipelines.name }}
+      configuration:
+        environmentVariables:
+          readOnly:
+            my_env_var: '1.0.$run_number'
+            ArtIP: $(echo ${int_ArtifactoryUnified_url}|awk -F '/' '{print $3}'|awk -F ':' '{print $1}')
+      steps:
+        - name: {{ .Values.Step1.name }}
+          type: MvnBuild
+          configuration:
+            sourceLocation: {{ .Values.GitRepo.path }}
+            mvnCommand: clean install -ntp
+            configFileLocation: .
+            configFileName: mvn-art-config
+            inputResources:
+              - name: {{ .Values.GitRepo.name }}
+                trigger: false
+            integrations:
+              - name: {{ .Values.Artifactory }}
+            runtime:
+              type: image
+              image:
+                auto:
+                  language: java
+                  versions:
+                    - "11"
+          execution:
+            onStart:
+              - javac -version
+              - mvn --version
+              #- add_pipeline_variables previous_backend_ver=${my_env_var}
+              - sed -ie 's/Default-Server/ArtifactoryUnified/g' $res_PetClinicProjectGitRepo_resourcePath/Samples/pet-clinic-project/spring-petclinic-microservices/spring-petclinic-config-server/mvn-art-config
+              #- sed -ie "s/2.3.1/$my_env_var/g" $res_PetClinicProjectGitRepo_resourcePath/spring-petclinic-customers-service/pom.xml
+            onComplete:
+              - echo $run_var
+              - echo "Running $pipeline_name | $step_name on node ID $step_node_id"
+            onSuccess:
+              - rm -r ${steplet_run_state_dir}/jfrog
+        - name: {{ .Values.Step2.name }}
+          type: DockerBuild
+          configuration:
+            affinityGroup: bldGroup
+            dockerFileLocation: {{ .Values.pipelines.dockerfile.location }}
+            dockerFileName: Dockerfile
+            dockerImageName: docker.${ArtIP}/pet_clinic_config_server_docker_image
+            dockerImageTag: '${run_number}'
+            integrations:
+              - name: {{ .Values.artifactory }}
+            inputResources:
+              - name: {{ .Values.gitRepo.name }}
+                trigger: false
+            outputResources:
+              - name: {{ .Values.dockerimage.name }}
+            inputSteps:
+              - name: {{ .Values.step1.name }}
+          execution:
+            onStart:
+              - sed -i "s/docker.artifactory/docker.${ArtIP}/" $res_PetClinicProjectGitRepo_resourcePath/Samples/pet-clinic-project/spring-petclinic-microservices/spring-petclinic-config-server/Dockerfile
+              - sed -i "s/artifactory-unified.soleng-us.jfrog.team/${ArtIP}/" $res_PetClinicProjectGitRepo_resourcePath/Samples/pet-clinic-project/spring-petclinic-microservices/spring-petclinic-config-server/Dockerfile
+              #- sed -i "s/1.0.0/$previous_backend_ver/g" $res_PetClinicProjectGitRepo_resourcePath/Dockerfile
+            onComplete:
+              - echo $step_env_var2
+              - echo "Running $pipeline_name | $step_name on node ID $step_node_id"
+        - name: push_config_server_docker_image
+          type: DockerPush
+          configuration:
+            affinityGroup: bldGroup
+            targetRepository: docker
+            forceXrayScan: false
+            failOnScan: false
+            autoPublishBuildInfo: true
+            integrations:
+              - name: {{ .Values.artifactory }}
+            inputSteps:
+              - name: {{ .Values.step2.name }}
+            outputResources:
+              - name: {{ .Values.outputresource.name }}

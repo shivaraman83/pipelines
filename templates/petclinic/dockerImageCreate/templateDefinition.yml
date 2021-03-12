@@ -47,8 +47,8 @@ pipelines:
             - javac -version
             - mvn --version
             #- add_pipeline_variables previous_backend_ver=${my_env_var}
-            - sed -ie 's/Default-Server/ArtifactoryUnified/g' $res_PetClinicProjectGitRepo_resourcePath/{{ .Values.GitRepo.path }}/mvn-art-config
-            #- sed -ie "s/2.3.1/$my_env_var/g" $res_PetClinicProjectGitRepo_resourcePath/spring-petclinic-customers-service/pom.xml
+            - sed -ie 's/Default-Server/ArtifactoryUnified/g' $res_PetClinicGitRepo_resourcePath/{{ .Values.GitRepo.path }}/mvn-art-config
+            #- sed -ie "s/2.3.1/$my_env_var/g" $res_PetClinicGitRepo_resourcePath/spring-petclinic-customers-service/pom.xml
           onComplete:
             - echo $run_var
             - echo "Running $pipeline_name | $step_name on node ID $step_node_id"
@@ -73,9 +73,9 @@ pipelines:
             - name: {{ .Values.Step1.name }}
         execution:
           onStart:
-            - sed -i "s/docker.artifactory/docker.artifactory-unified.soleng-us.jfrog.team/" $res_PetClinicProjectGitRepo_resourcePath/{{ .Values.GitRepo.path }}/Dockerfile
-            #- sed -i "s/artifactory-unified.soleng-us.jfrog.team/${ArtIP}/" $res_PetClinicProjectGitRepo_resourcePath/Samples/pet-clinic-project/spring-petclinic-microservices/spring-petclinic-config-server/Dockerfile
-            #- sed -i "s/1.0.0/$previous_backend_ver/g" $res_PetClinicProjectGitRepo_resourcePath/Dockerfile
+            - sed -i "s/docker.artifactory/docker.artifactory-unified.soleng-us.jfrog.team/" $res_PetClinicGitRepo_resourcePath/{{ .Values.GitRepo.path }}/Dockerfile
+            #- sed -i "s/artifactory-unified.soleng-us.jfrog.team/${ArtIP}/" $res_PetClinicGitRepo_resourcePath/Samples/pet-clinic-project/spring-petclinic-microservices/spring-petclinic-config-server/Dockerfile
+            #- sed -i "s/1.0.0/$previous_backend_ver/g" $res_PetClinicGitRepo_resourcePath/Dockerfile
           onComplete:
             - echo $step_env_var2
             - echo "Running $pipeline_name | $step_name on node ID $step_node_id"

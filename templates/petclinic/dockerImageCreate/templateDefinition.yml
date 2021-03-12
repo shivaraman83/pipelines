@@ -1,73 +1,73 @@
 pipelines:
   - name: {{ .Values.Pipelines.name }}
-      steps:
-        - name: {{ .Values.Step1.name }}
-          type: MvnBuild
-          configuration:
-            sourceLocation: {{ .Values.GitRepo.path }}
-            mvnCommand: clean install -ntp
-            configFileLocation: .
-            configFileName: mvn-art-config
-            inputResources:
-              - name: {{ .Values.GitRepo.name }}
-                trigger: false
-            integrations:
-              - name: {{ .Values.Artifactory }}
-            runtime:
-              type: image
-              image:
-                auto:
-                  language: java
-                  versions:
-                    - "11"
-          execution:
-            onStart:
-              - javac -version
-              - mvn --version
-              #- add_pipeline_variables previous_backend_ver=${my_env_var}
-              - sed -ie 's/Default-Server/ArtifactoryUnified/g' $res_PetClinicProjectGitRepo_resourcePath/Samples/pet-clinic-project/spring-petclinic-microservices/spring-petclinic-config-server/mvn-art-config
-              #- sed -ie "s/2.3.1/$my_env_var/g" $res_PetClinicProjectGitRepo_resourcePath/spring-petclinic-customers-service/pom.xml
-            onComplete:
-              - echo $run_var
-              - echo "Running $pipeline_name | $step_name on node ID $step_node_id"
-            onSuccess:
-              - rm -r ${steplet_run_state_dir}/jfrog
-        - name: {{ .Values.Step2.name }}
-          type: DockerBuild
-          configuration:
-            affinityGroup: bldGroup
-            dockerFileLocation: {{ .Values.Step2.dockerFileLocation }}
-            dockerFileName: Dockerfile
-            dockerImageName: {{ .Values.Step2.dockerImageName }}
-            dockerImageTag: '${run_number}'
-            integrations:
-              - name: {{ .Values.Artifactory }}
-            inputResources:
-              - name: {{ .Values.GitRepo.name }}
-                trigger: false
-            outputResources:
-              - name: {{ .Values.Step2.outputResourceName }}
-            inputSteps:
-              - name: {{ .Values.Step1.name }}
-          execution:
-            onStart:
-              - sed -i "s/docker.artifactory/docker.artifactory-unified.soleng-us.jfrog.team/" $res_PetClinicProjectGitRepo_resourcePath/Samples/pet-clinic-project/spring-petclinic-microservices/spring-petclinic-config-server/Dockerfile
-              #- sed -i "s/artifactory-unified.soleng-us.jfrog.team/${ArtIP}/" $res_PetClinicProjectGitRepo_resourcePath/Samples/pet-clinic-project/spring-petclinic-microservices/spring-petclinic-config-server/Dockerfile
-              #- sed -i "s/1.0.0/$previous_backend_ver/g" $res_PetClinicProjectGitRepo_resourcePath/Dockerfile
-            onComplete:
-              - echo $step_env_var2
-              - echo "Running $pipeline_name | $step_name on node ID $step_node_id"
-        - name: {{ .Values.Step3.name }}
-          type: DockerPush
-          configuration:
-            affinityGroup: bldGroup
-            targetRepository: docker
-            forceXrayScan: false
-            failOnScan: false
-            autoPublishBuildInfo: true
-            integrations:
-              - name: {{ .Values.Artifactory }}
-            inputSteps:
-              - name: {{ .Values.Step2.name }}
-            outputResources:
-              - name: {{ .Values.Step3.outputResourceName }}
+    steps:
+      - name: {{ .Values.Step1.name }}
+        type: MvnBuild
+        configuration:
+          sourceLocation: {{ .Values.GitRepo.path }}
+          mvnCommand: clean install -ntp
+          configFileLocation: .
+          configFileName: mvn-art-config
+          inputResources:
+            - name: {{ .Values.GitRepo.name }}
+              trigger: false
+          integrations:
+            - name: {{ .Values.Artifactory }}
+          runtime:
+            type: image
+            image:
+              auto:
+                language: java
+                versions:
+                  - "11"
+        execution:
+          onStart:
+            - javac -version
+            - mvn --version
+            #- add_pipeline_variables previous_backend_ver=${my_env_var}
+            - sed -ie 's/Default-Server/ArtifactoryUnified/g' $res_PetClinicProjectGitRepo_resourcePath/Samples/pet-clinic-project/spring-petclinic-microservices/spring-petclinic-config-server/mvn-art-config
+            #- sed -ie "s/2.3.1/$my_env_var/g" $res_PetClinicProjectGitRepo_resourcePath/spring-petclinic-customers-service/pom.xml
+          onComplete:
+            - echo $run_var
+            - echo "Running $pipeline_name | $step_name on node ID $step_node_id"
+          onSuccess:
+            - rm -r ${steplet_run_state_dir}/jfrog
+      - name: {{ .Values.Step2.name }}
+        type: DockerBuild
+        configuration:
+          affinityGroup: bldGroup
+          dockerFileLocation: {{ .Values.Step2.dockerFileLocation }}
+          dockerFileName: Dockerfile
+          dockerImageName: {{ .Values.Step2.dockerImageName }}
+          dockerImageTag: '${run_number}'
+          integrations:
+            - name: {{ .Values.Artifactory }}
+          inputResources:
+            - name: {{ .Values.GitRepo.name }}
+              trigger: false
+          outputResources:
+            - name: {{ .Values.Step2.outputResourceName }}
+          inputSteps:
+            - name: {{ .Values.Step1.name }}
+        execution:
+          onStart:
+            - sed -i "s/docker.artifactory/docker.artifactory-unified.soleng-us.jfrog.team/" $res_PetClinicProjectGitRepo_resourcePath/Samples/pet-clinic-project/spring-petclinic-microservices/spring-petclinic-config-server/Dockerfile
+            #- sed -i "s/artifactory-unified.soleng-us.jfrog.team/${ArtIP}/" $res_PetClinicProjectGitRepo_resourcePath/Samples/pet-clinic-project/spring-petclinic-microservices/spring-petclinic-config-server/Dockerfile
+            #- sed -i "s/1.0.0/$previous_backend_ver/g" $res_PetClinicProjectGitRepo_resourcePath/Dockerfile
+          onComplete:
+            - echo $step_env_var2
+            - echo "Running $pipeline_name | $step_name on node ID $step_node_id"
+      - name: {{ .Values.Step3.name }}
+        type: DockerPush
+        configuration:
+          affinityGroup: bldGroup
+          targetRepository: docker
+          forceXrayScan: false
+          failOnScan: false
+          autoPublishBuildInfo: true
+          integrations:
+            - name: {{ .Values.Artifactory }}
+          inputSteps:
+            - name: {{ .Values.Step2.name }}
+          outputResources:
+            - name: {{ .Values.Step3.outputResourceName }}

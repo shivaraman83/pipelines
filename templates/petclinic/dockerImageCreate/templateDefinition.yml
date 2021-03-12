@@ -1,3 +1,18 @@
+resources:
+  - name: {{ .Values.Resource1.name }}
+    type: Image
+    configuration:
+      registry: {{ .Values.Artifactory }}
+      sourceRepository: docker
+      imageName: {{ .Values.Resource1.imageName }}
+      imageTag: '${run_number}'
+      autoPull: true
+  - name: {{ .Values.Resource2.name }}
+    type: BuildInfo
+    configuration:
+      sourceArtifactory: {{ .Values.Artifactory }}
+      buildName: {{ .Values.Pipelines.name }}
+      buildNumber: 1
 pipelines:
   - name: {{ .Values.Pipelines.name }}
     steps:

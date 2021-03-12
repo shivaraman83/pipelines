@@ -51,8 +51,8 @@ pipelines:
               - name: {{ .Values.Step1.name }}
           execution:
             onStart:
-              - sed -i "s/docker.artifactory/docker.${ArtIP}/" $res_PetClinicProjectGitRepo_resourcePath/Samples/pet-clinic-project/spring-petclinic-microservices/spring-petclinic-config-server/Dockerfile
-              - sed -i "s/artifactory-unified.soleng-us.jfrog.team/${ArtIP}/" $res_PetClinicProjectGitRepo_resourcePath/Samples/pet-clinic-project/spring-petclinic-microservices/spring-petclinic-config-server/Dockerfile
+              - sed -i "s/docker.artifactory/docker.artifactory-unified.soleng-us.jfrog.team/" $res_PetClinicProjectGitRepo_resourcePath/Samples/pet-clinic-project/spring-petclinic-microservices/spring-petclinic-config-server/Dockerfile
+              #- sed -i "s/artifactory-unified.soleng-us.jfrog.team/${ArtIP}/" $res_PetClinicProjectGitRepo_resourcePath/Samples/pet-clinic-project/spring-petclinic-microservices/spring-petclinic-config-server/Dockerfile
               #- sed -i "s/1.0.0/$previous_backend_ver/g" $res_PetClinicProjectGitRepo_resourcePath/Dockerfile
             onComplete:
               - echo $step_env_var2

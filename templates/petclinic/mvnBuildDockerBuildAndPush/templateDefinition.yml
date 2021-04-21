@@ -73,7 +73,7 @@ pipelines:
             - name: {{ .Values.Step1.name }}
         execution:
           onStart:
-            - sed -i "s/docker.artifactory/docker.artifactory-unified.soleng-us.jfrog.team/" $res_PetClinicGitRepo_resourcePath/{{ .Values.GitRepo.path }}/Dockerfile
+            - sed -i "s/docker.artifactory/docker.artifactory-unified.soleng-us.jfrog.team/" $res_{{ .Values.Resource3.name }}_resourcePath/{{ .Values.GitRepo.path }}/Dockerfile
             #- sed -i "s/artifactory-unified.soleng-us.jfrog.team/${ArtIP}/" $res_PetClinicGitRepo_resourcePath/Samples/pet-clinic-project/spring-petclinic-microservices/spring-petclinic-config-server/Dockerfile
             #- sed -i "s/1.0.0/$previous_backend_ver/g" $res_PetClinicGitRepo_resourcePath/Dockerfile
           onComplete:
